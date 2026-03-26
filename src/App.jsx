@@ -1,69 +1,254 @@
 import { useState } from 'react'
-import { toolsData, categoryMeta } from './data/toolsData'
+import { questions, calculateResults } from './data/quizData'
 
-const categories = Object.keys(categoryMeta)
+const TOTAL_STEPS = questions.length
 
-function StarRating({ rating }) {
+// ─── Landing Page ────────────────────────────────────────────────────────────
+function Landing({ onStart }) {
   return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <svg key={star} className={`w-4 h-4 ${rating >= star ? 'text-yellow-400' : rating >= star - 0.5 ? 'text-yellow-300' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-      <span className="text-sm text-gray-600 ml-1">{rating.toFixed(1)}</span>
+    <div className="min-h-screen flex flex-col">
+      <header className="bg-white border-b border-gray-100 px-4 py-4">
+        <div className="max-w-5xl mx-auto flex items-center gap-2">
+          <span className="text-2xl">⚡</span>
+          <span className="font-extrabold text-gray-900 text-xl tracking-tight">SideHustleTest</span>
+        </div>
+      </header>
+
+      <div className="flex-1 bg-gradient-to-br from-teal-500 via-teal-600 to-emerald-700 text-white flex flex-col items-center justify-center px-4 py-20 text-center">
+        <div className="max-w-2xl mx-auto">
+          <div className="inline-block bg-white/20 text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
+            Free 2-minute quiz
+          </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+            Find Your Perfect<br />Side Hustle
+          </h1>
+          <p className="text-teal-100 text-lg sm:text-xl mb-10 leading-relaxed">
+            Answer 9 quick questions about your hobbies, skills, time, and goals — and we'll match you to the side hustle that actually fits your life.
+          </p>
+          <button
+            onClick={onStart}
+            className="bg-white text-teal-700 font-bold text-lg px-10 py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200"
+          >
+            Take the Free Quiz →
+          </button>
+          <p className="text-teal-200 text-sm mt-4">No email required · 2 minutes · Personalized results</p>
+        </div>
+      </div>
+
+      <div className="bg-white py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 text-center mb-10">
+            Stop guessing. Start earning.
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {[
+              { emoji: '🎯', title: 'Personalized Match', desc: 'We score 20 different side hustles based on your unique answers.' },
+              { emoji: '💡', title: 'Real Advice', desc: 'Each result includes earnings potential, startup cost, and exactly how to begin.' },
+              { emoji: '⚡', title: 'Takes 2 Minutes', desc: '9 questions. Instant results. No fluff, no email required.' },
+            ].map(item => (
+              <div key={item.title} className="text-center">
+                <div className="text-4xl mb-3">{item.emoji}</div>
+                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-teal-600 py-10 px-4 text-center">
+        <p className="text-white text-xl font-bold mb-4">Ready to find your ideal side hustle?</p>
+        <button
+          onClick={onStart}
+          className="bg-white text-teal-700 font-bold px-8 py-3 rounded-xl hover:bg-teal-50 transition-colors"
+        >
+          Start the Quiz — It's Free
+        </button>
+      </div>
+
+      <footer className="bg-white border-t border-gray-100 py-6 text-center text-sm text-gray-400">
+        <p>© 2025 SideHustleTest.com · Built to help you earn more</p>
+      </footer>
     </div>
   )
 }
 
-function FitBar({ score }) {
-  const color = score >= 90 ? 'bg-teal-500' : score >= 75 ? 'bg-blue-500' : 'bg-gray-400'
+// ─── Progress Bar ─────────────────────────────────────────────────────────────
+function ProgressBar({ current, total }) {
+  const pct = Math.round((current / total) * 100)
   return (
-    <div>
-      <div className="flex justify-between text-xs text-gray-500 mb-1">
-        <span>Side Hustle Fit</span>
-        <span className="font-semibold text-gray-700">{score}/100</span>
-      </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${score}%` }} />
-      </div>
+    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+      <div
+        className="h-full bg-teal-500 rounded-full transition-all duration-500"
+        style={{ width: `${pct}%` }}
+      />
     </div>
   )
 }
 
-function ToolCard({ tool }) {
-  const meta = categoryMeta[tool.category]
+// ─── Quiz Step ────────────────────────────────────────────────────────────────
+function QuizStep({ question, value, onChange, onNext, onBack, stepIndex, total }) {
+  const isMulti = question.type === 'multi-select'
+  const selected = isMulti ? (value || []) : value
+
+  function toggle(optId) {
+    if (isMulti) {
+      const cur = selected || []
+      if (cur.includes(optId)) {
+        onChange(cur.filter(x => x !== optId))
+      } else {
+        onChange([...cur, optId])
+      }
+    } else {
+      onChange(optId)
+    }
+  }
+
+  const canAdvance = isMulti ? (selected && selected.length > 0) : !!selected
+
   return (
-    <div className={`relative bg-white rounded-2xl border shadow-sm hover:shadow-md transition-shadow flex flex-col ${tool.is_top_pick ? 'border-teal-400 ring-1 ring-teal-300' : 'border-gray-200'}`}>
-      {tool.is_top_pick && (
-        <div className="absolute -top-3 left-4">
-          <span className="bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
-            TOP PICK
-          </span>
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">⚡</span>
+              <span className="font-extrabold text-gray-900 tracking-tight">SideHustleTest</span>
+            </div>
+            <span className="text-sm text-gray-400 font-medium">
+              {stepIndex + 1} of {total}
+            </span>
+          </div>
+          <ProgressBar current={stepIndex + 1} total={total} />
+        </div>
+      </header>
+
+      <main className="flex-1 flex flex-col items-center px-4 py-10">
+        <div className="w-full max-w-2xl">
+          <div className="mb-8">
+            <p className="text-sm font-semibold text-teal-600 mb-2 uppercase tracking-widest">
+              Question {stepIndex + 1}
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">
+              {question.question}
+            </h2>
+            <p className="text-gray-500">{question.subtitle}</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
+            {question.options.map(opt => {
+              const isSelected = isMulti
+                ? (selected || []).includes(opt.id)
+                : selected === opt.id
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => toggle(opt.id)}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 text-left transition-all duration-150
+                    ${isSelected
+                      ? 'border-teal-500 bg-teal-50 shadow-sm'
+                      : 'border-gray-200 bg-white hover:border-teal-300 hover:bg-teal-50/40'
+                    }`}
+                >
+                  <span className="text-2xl shrink-0">{opt.emoji}</span>
+                  <span className={`font-medium text-sm leading-snug ${isSelected ? 'text-teal-700' : 'text-gray-700'}`}>
+                    {opt.label}
+                  </span>
+                  {isSelected && (
+                    <span className="ml-auto shrink-0 text-teal-500">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="flex gap-3">
+            {stepIndex > 0 && (
+              <button
+                onClick={onBack}
+                className="px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                ← Back
+              </button>
+            )}
+            <button
+              onClick={onNext}
+              disabled={!canAdvance}
+              className={`flex-1 py-3 rounded-xl font-bold text-base transition-all duration-150
+                ${canAdvance
+                  ? 'bg-teal-500 hover:bg-teal-600 text-white shadow-md hover:shadow-lg'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+            >
+              {stepIndex === total - 1 ? 'See My Results →' : 'Next Question →'}
+            </button>
+          </div>
+
+          {isMulti && (
+            <p className="text-center text-xs text-gray-400 mt-3">
+              {(selected || []).length} selected — pick as many as you like
+            </p>
+          )}
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ─── Results ──────────────────────────────────────────────────────────────────
+function DifficultyBadge({ label }) {
+  const color = label.startsWith('Beginner') ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+  return <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${color}`}>{label}</span>
+}
+
+function HustleCard({ hustle, rank }) {
+  const [expanded, setExpanded] = useState(false)
+  const isTop = rank === 1
+
+  return (
+    <div className={`bg-white rounded-2xl border-2 shadow-sm overflow-hidden ${isTop ? 'border-teal-400' : 'border-gray-100'}`}>
+      {isTop && (
+        <div className="bg-teal-500 text-white text-xs font-bold text-center py-1.5 tracking-widest uppercase">
+          ⭐ Your Best Match
         </div>
       )}
-      <div className="p-5 flex flex-col gap-3 flex-1">
-        <div className="flex items-start justify-between gap-2 mt-1">
-          <div>
-            <h3 className="font-bold text-gray-900 text-lg leading-tight">{tool.name}</h3>
-            <p className="text-xs text-gray-500 mt-0.5">{meta.emoji} {meta.label}</p>
+      <div className="p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-3">
+            <span className="text-4xl">{hustle.emoji}</span>
+            <div>
+              <h3 className="font-extrabold text-gray-900 text-xl leading-tight">{hustle.name}</h3>
+              <DifficultyBadge label={hustle.difficulty} />
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            {tool.has_free_tier && (
-              <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Free tier</span>
-            )}
-            <span className="text-sm font-semibold text-gray-700">{tool.price_starting_at}</span>
-          </div>
+          <span className="shrink-0 bg-gray-100 text-gray-500 text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full">
+            #{rank}
+          </span>
         </div>
 
-        <p className="text-sm text-gray-600 leading-relaxed">{tool.tagline}</p>
+        <p className="text-gray-600 text-sm leading-relaxed mb-4">{hustle.description}</p>
 
-        <StarRating rating={tool.overall_rating} />
-        <FitBar score={tool.fit_score} />
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {[
+            { label: 'Earnings', value: hustle.earnings, icon: '💵' },
+            { label: 'Startup', value: hustle.startup_cost, icon: '🚀' },
+            { label: 'Hours/wk', value: hustle.time_per_week, icon: '⏰' },
+          ].map(stat => (
+            <div key={stat.label} className="bg-gray-50 rounded-xl p-2.5 text-center">
+              <div className="text-lg mb-0.5">{stat.icon}</div>
+              <div className="text-xs text-gray-500">{stat.label}</div>
+              <div className="text-xs font-bold text-gray-800 mt-0.5 leading-tight">{stat.value}</div>
+            </div>
+          ))}
+        </div>
 
-        <div className="space-y-1">
-          {tool.pros.slice(0, 3).map((pro) => (
-            <div key={pro} className="flex items-start gap-2 text-sm text-gray-700">
+        <div className="space-y-1.5 mb-4">
+          {hustle.pros.map(pro => (
+            <div key={pro} className="flex items-start gap-2 text-sm text-gray-600">
               <svg className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
@@ -72,143 +257,126 @@ function ToolCard({ tool }) {
           ))}
         </div>
 
-        <div className="mt-auto pt-2">
-          <a
-            href={tool.affiliate_url}
-            className="block w-full text-center bg-teal-500 hover:bg-teal-600 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors"
-          >
-            Try {tool.name} →
-          </a>
-        </div>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full text-sm font-semibold text-teal-600 hover:text-teal-700 py-2 border border-teal-200 rounded-xl hover:bg-teal-50 transition-colors"
+        >
+          {expanded ? '▲ Hide Action Steps' : '▼ How to Get Started'}
+        </button>
+        {expanded && (
+          <div className="mt-3 bg-teal-50 border border-teal-200 rounded-xl p-4">
+            <p className="text-sm text-teal-800 font-semibold mb-1">First steps:</p>
+            <p className="text-sm text-teal-700 leading-relaxed">{hustle.get_started}</p>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-function CategorySection({ category, tools, isVisible }) {
-  if (!isVisible) return null
-  const meta = categoryMeta[category]
-  const topPick = tools.find((t) => t.is_top_pick)
-  const rest = tools.filter((t) => !t.is_top_pick)
-  const sorted = topPick ? [topPick, ...rest] : tools
-
+function Results({ results, onRetake }) {
   return (
-    <section className="mb-14">
-      <div className="flex items-center gap-2 mb-5">
-        <span className="text-2xl">{meta.emoji}</span>
-        <h2 className="text-xl font-bold text-gray-900">{meta.label}</h2>
-        <span className="text-sm text-gray-400 ml-1">({tools.length} tools)</span>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {sorted.map((tool) => (
-          <ToolCard key={tool.slug} tool={tool} />
-        ))}
-      </div>
-    </section>
-  )
-}
-
-export default function App() {
-  const [activeCategory, setActiveCategory] = useState('all')
-  const [search, setSearch] = useState('')
-
-  const filteredTools = toolsData.filter((tool) => {
-    const matchesCategory = activeCategory === 'all' || tool.category === activeCategory
-    const q = search.toLowerCase()
-    const matchesSearch = !q || tool.name.toLowerCase().includes(q) || tool.tagline.toLowerCase().includes(q)
-    return matchesCategory && matchesSearch
-  })
-
-  const visibleCategories = activeCategory === 'all'
-    ? categories
-    : [activeCategory]
-
-  return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">⚡</span>
-            <span className="font-extrabold text-gray-900 text-lg tracking-tight">SideHustleTest</span>
+            <span className="text-xl">⚡</span>
+            <span className="font-extrabold text-gray-900 tracking-tight">SideHustleTest</span>
           </div>
-          <p className="hidden sm:block text-sm text-gray-500">The best tools for every side hustle</p>
+          <button
+            onClick={onRetake}
+            className="text-sm text-teal-600 font-semibold hover:text-teal-700"
+          >
+            Retake Quiz
+          </button>
         </div>
       </header>
 
-      {/* Hero */}
-      <div className="bg-gradient-to-br from-teal-500 to-teal-700 text-white py-14 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 leading-tight">
-            Find the best tools for your side hustle
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-10">
+        <div className="text-center mb-10">
+          <div className="text-5xl mb-4">🎉</div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">
+            Your Top Side Hustles
           </h1>
-          <p className="text-teal-100 text-lg mb-8">
-            {toolsData.length} tools across {categories.length} categories — ranked by real side-hustle fit.
+          <p className="text-gray-500 text-lg">
+            Based on your answers, here are your 5 personalized matches — ranked best fit first.
           </p>
-          <input
-            type="text"
-            placeholder="Search tools..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full max-w-md bg-white text-gray-900 placeholder-gray-400 rounded-xl px-4 py-3 text-sm shadow-lg outline-none focus:ring-2 focus:ring-teal-300"
-          />
         </div>
-      </div>
 
-      {/* Category Tabs */}
-      <div className="sticky top-[57px] z-20 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto py-2 scrollbar-hide">
-            <button
-              onClick={() => setActiveCategory('all')}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeCategory === 'all' ? 'bg-teal-500 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-            >
-              All
-            </button>
-            {categories.map((cat) => {
-              const meta = categoryMeta[cat]
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${activeCategory === cat ? 'bg-teal-500 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                  {meta.emoji} {meta.label}
-                </button>
-              )
-            })}
-          </div>
+        <div className="space-y-6">
+          {results.map((hustle, i) => (
+            <HustleCard key={hustle.id} hustle={hustle} rank={i + 1} />
+          ))}
         </div>
-      </div>
 
-      {/* Tools Grid */}
-      <main className="max-w-6xl mx-auto px-4 py-10">
-        {filteredTools.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            <p className="text-lg">No tools found for "{search}"</p>
-          </div>
-        ) : (
-          visibleCategories.map((cat) => {
-            const tools = filteredTools.filter((t) => t.category === cat)
-            return (
-              <CategorySection
-                key={cat}
-                category={cat}
-                tools={tools}
-                isVisible={tools.length > 0}
-              />
-            )
-          })
-        )}
+        <div className="mt-12 bg-teal-600 rounded-2xl p-6 sm:p-8 text-center text-white">
+          <h2 className="text-xl font-extrabold mb-2">Not quite right?</h2>
+          <p className="text-teal-100 text-sm mb-5">Retake the quiz with different answers and see how your results change.</p>
+          <button
+            onClick={onRetake}
+            className="bg-white text-teal-700 font-bold px-8 py-3 rounded-xl hover:bg-teal-50 transition-colors"
+          >
+            Retake the Quiz
+          </button>
+        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white mt-10">
-        <div className="max-w-6xl mx-auto px-4 py-8 text-center text-sm text-gray-400">
-          <p>© 2025 SideHustleTest · Tools ranked by side-hustle fit, not commission.</p>
-          <p className="mt-1">Some links are affiliate links. We only recommend tools we'd actually use.</p>
-        </div>
+      <footer className="bg-white border-t border-gray-100 py-6 text-center text-sm text-gray-400">
+        <p>© 2025 SideHustleTest.com · Find your best side hustle</p>
       </footer>
     </div>
+  )
+}
+
+// ─── App Shell ────────────────────────────────────────────────────────────────
+export default function App() {
+  const [view, setView] = useState('landing')
+  const [step, setStep] = useState(0)
+  const [answers, setAnswers] = useState({})
+  const [results, setResults] = useState(null)
+
+  function startQuiz() {
+    setStep(0)
+    setAnswers({})
+    setResults(null)
+    setView('quiz')
+  }
+
+  function handleNext() {
+    if (step < TOTAL_STEPS - 1) {
+      setStep(s => s + 1)
+      window.scrollTo(0, 0)
+    } else {
+      const r = calculateResults(answers)
+      setResults(r)
+      setView('results')
+      window.scrollTo(0, 0)
+    }
+  }
+
+  function handleBack() {
+    if (step > 0) {
+      setStep(s => s - 1)
+      window.scrollTo(0, 0)
+    }
+  }
+
+  function handleChange(val) {
+    setAnswers(prev => ({ ...prev, [questions[step].id]: val }))
+  }
+
+  if (view === 'landing') return <Landing onStart={startQuiz} />
+  if (view === 'results') return <Results results={results} onRetake={startQuiz} />
+
+  return (
+    <QuizStep
+      question={questions[step]}
+      value={answers[questions[step].id]}
+      onChange={handleChange}
+      onNext={handleNext}
+      onBack={handleBack}
+      stepIndex={step}
+      total={TOTAL_STEPS}
+    />
   )
 }
