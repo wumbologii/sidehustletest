@@ -1,52 +1,123 @@
 import { useState } from 'react'
+import { Routes, Route, useNavigate, Link } from 'react-router-dom'
 import { questions, calculateResults } from './data/quizData'
 
 const TOTAL_STEPS = questions.length
 
-// ─── Landing Page ────────────────────────────────────────────────────────────
-function Landing({ onStart }) {
+// ─── Shared Nav ───────────────────────────────────────────────────────────────
+function Nav({ right }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-white border-b border-gray-100 px-4 py-4">
-        <div className="max-w-5xl mx-auto flex items-center gap-2">
+    <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-10">
+      <div className="max-w-5xl mx-auto flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <span className="text-2xl">⚡</span>
           <span className="font-extrabold text-gray-900 text-xl tracking-tight">SideHustleTest</span>
-        </div>
-      </header>
+        </Link>
+        {right}
+      </div>
+    </header>
+  )
+}
 
-      <div className="flex-1 bg-gradient-to-br from-teal-500 via-teal-600 to-emerald-700 text-white flex flex-col items-center justify-center px-4 py-20 text-center">
+// ─── Landing Page ─────────────────────────────────────────────────────────────
+function Landing() {
+  const navigate = useNavigate()
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Nav />
+
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-teal-500 via-teal-600 to-emerald-700 text-white px-4 py-24 text-center">
         <div className="max-w-2xl mx-auto">
           <div className="inline-block bg-white/20 text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
-            Free 2-minute quiz
+            100% Free · No Email Required
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-            Find Your Perfect<br />Side Hustle
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-5">
+            Find Your Perfect<br />Side Hustle<br />in 3 Minutes
           </h1>
-          <p className="text-teal-100 text-lg sm:text-xl mb-10 leading-relaxed">
-            Answer 9 quick questions about your hobbies, skills, time, and goals — and we'll match you to the side hustle that actually fits your life.
+          <p className="text-teal-100 text-lg sm:text-xl mb-10 leading-relaxed max-w-xl mx-auto">
+            Answer 9 questions and get matched to the best side hustles for your skills, time, and goals.
           </p>
           <button
-            onClick={onStart}
-            className="bg-white text-teal-700 font-bold text-lg px-10 py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200"
+            onClick={() => navigate('/quiz')}
+            className="bg-white text-teal-700 font-bold text-lg px-12 py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200"
           >
             Take the Free Quiz →
           </button>
-          <p className="text-teal-200 text-sm mt-4">No email required · 2 minutes · Personalized results</p>
+
+          {/* Trust row */}
+          <div className="flex items-center justify-center gap-6 sm:gap-10 mt-10 flex-wrap">
+            {[
+              { icon: '📋', label: '9-Question Quiz' },
+              { icon: '🏆', label: '20 Side Hustles Ranked' },
+              { icon: '🆓', label: '100% Free' },
+            ].map(t => (
+              <div key={t.label} className="flex items-center gap-2 text-teal-100 text-sm font-semibold">
+                <span className="text-xl">{t.icon}</span>
+                {t.label}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="bg-white py-16 px-4">
+      {/* How It Works */}
+      <div className="bg-white py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 text-center mb-4">
+            How It Works
+          </h2>
+          <p className="text-center text-gray-500 mb-14 max-w-lg mx-auto">
+            Three simple steps to find the side hustle that fits your life.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
+            {[
+              {
+                step: '1',
+                emoji: '📝',
+                title: 'Answer 9 Questions',
+                desc: 'Tell us about your hobbies, skills, how much time and money you can invest, and what you want to avoid.',
+              },
+              {
+                step: '2',
+                emoji: '⚙️',
+                title: 'We Score 20 Hustles',
+                desc: 'Our algorithm matches your answers against 20 different side hustles and scores each one based on fit.',
+              },
+              {
+                step: '3',
+                emoji: '🎯',
+                title: 'Get Your Matches',
+                desc: 'See your top 5 personalized results with earnings potential, startup costs, and exact steps to begin.',
+              },
+            ].map(item => (
+              <div key={item.step} className="text-center">
+                <div className="w-12 h-12 rounded-full bg-teal-500 text-white font-extrabold text-lg flex items-center justify-center mx-auto mb-4">
+                  {item.step}
+                </div>
+                <div className="text-4xl mb-3">{item.emoji}</div>
+                <h3 className="font-bold text-gray-900 text-lg mb-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Why section */}
+      <div className="bg-slate-50 py-16 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 text-center mb-10">
             Stop guessing. Start earning.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             {[
-              { emoji: '🎯', title: 'Personalized Match', desc: 'We score 20 different side hustles based on your unique answers.' },
-              { emoji: '💡', title: 'Real Advice', desc: 'Each result includes earnings potential, startup cost, and exactly how to begin.' },
-              { emoji: '⚡', title: 'Takes 2 Minutes', desc: '9 questions. Instant results. No fluff, no email required.' },
+              { emoji: '🎯', title: 'Personalized Match', desc: 'We score 20 different side hustles based on your unique answers — not a generic list.' },
+              { emoji: '💡', title: 'Real Actionable Advice', desc: 'Each result shows earnings potential, startup cost, and exactly how to get your first client or sale.' },
+              { emoji: '⚡', title: 'Instant Results', desc: '9 questions. Done in 3 minutes. No email required, no fluff, no upsells.' },
             ].map(item => (
-              <div key={item.title} className="text-center">
+              <div key={item.title} className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100">
                 <div className="text-4xl mb-3">{item.emoji}</div>
                 <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
@@ -56,13 +127,15 @@ function Landing({ onStart }) {
         </div>
       </div>
 
-      <div className="bg-teal-600 py-10 px-4 text-center">
-        <p className="text-white text-xl font-bold mb-4">Ready to find your ideal side hustle?</p>
+      {/* Bottom CTA */}
+      <div className="bg-teal-600 py-14 px-4 text-center">
+        <h2 className="text-white text-2xl sm:text-3xl font-extrabold mb-3">Ready to find your side hustle?</h2>
+        <p className="text-teal-100 mb-8">It takes 3 minutes. Results are instant.</p>
         <button
-          onClick={onStart}
-          className="bg-white text-teal-700 font-bold px-8 py-3 rounded-xl hover:bg-teal-50 transition-colors"
+          onClick={() => navigate('/quiz')}
+          className="bg-white text-teal-700 font-bold text-lg px-10 py-4 rounded-2xl hover:bg-teal-50 transition-colors shadow-lg"
         >
-          Start the Quiz — It's Free
+          Take the Free Quiz →
         </button>
       </div>
 
@@ -94,11 +167,7 @@ function QuizStep({ question, value, onChange, onNext, onBack, stepIndex, total 
   function toggle(optId) {
     if (isMulti) {
       const cur = selected || []
-      if (cur.includes(optId)) {
-        onChange(cur.filter(x => x !== optId))
-      } else {
-        onChange([...cur, optId])
-      }
+      onChange(cur.includes(optId) ? cur.filter(x => x !== optId) : [...cur, optId])
     } else {
       onChange(optId)
     }
@@ -111,13 +180,11 @@ function QuizStep({ question, value, onChange, onNext, onBack, stepIndex, total 
       <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <span className="text-xl">⚡</span>
               <span className="font-extrabold text-gray-900 tracking-tight">SideHustleTest</span>
-            </div>
-            <span className="text-sm text-gray-400 font-medium">
-              {stepIndex + 1} of {total}
-            </span>
+            </Link>
+            <span className="text-sm text-gray-400 font-medium">{stepIndex + 1} of {total}</span>
           </div>
           <ProgressBar current={stepIndex + 1} total={total} />
         </div>
@@ -137,9 +204,7 @@ function QuizStep({ question, value, onChange, onNext, onBack, stepIndex, total 
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
             {question.options.map(opt => {
-              const isSelected = isMulti
-                ? (selected || []).includes(opt.id)
-                : selected === opt.id
+              const isSelected = isMulti ? (selected || []).includes(opt.id) : selected === opt.id
               return (
                 <button
                   key={opt.id}
@@ -275,29 +340,20 @@ function HustleCard({ hustle, rank }) {
 }
 
 function Results({ results, onRetake }) {
+  const navigate = useNavigate()
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">⚡</span>
-            <span className="font-extrabold text-gray-900 tracking-tight">SideHustleTest</span>
-          </div>
-          <button
-            onClick={onRetake}
-            className="text-sm text-teal-600 font-semibold hover:text-teal-700"
-          >
-            Retake Quiz
-          </button>
-        </div>
-      </header>
+      <Nav right={
+        <button onClick={onRetake} className="text-sm text-teal-600 font-semibold hover:text-teal-700">
+          Retake Quiz
+        </button>
+      } />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-10">
         <div className="text-center mb-10">
           <div className="text-5xl mb-4">🎉</div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">
-            Your Top Side Hustles
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">Your Top Side Hustles</h1>
           <p className="text-gray-500 text-lg">
             Based on your answers, here are your 5 personalized matches — ranked best fit first.
           </p>
@@ -311,7 +367,7 @@ function Results({ results, onRetake }) {
 
         <div className="mt-12 bg-teal-600 rounded-2xl p-6 sm:p-8 text-center text-white">
           <h2 className="text-xl font-extrabold mb-2">Not quite right?</h2>
-          <p className="text-teal-100 text-sm mb-5">Retake the quiz with different answers and see how your results change.</p>
+          <p className="text-teal-100 text-sm mb-5">Retake the quiz with different answers to see new results.</p>
           <button
             onClick={onRetake}
             className="bg-white text-teal-700 font-bold px-8 py-3 rounded-xl hover:bg-teal-50 transition-colors"
@@ -328,45 +384,39 @@ function Results({ results, onRetake }) {
   )
 }
 
-// ─── App Shell ────────────────────────────────────────────────────────────────
-export default function App() {
-  const [view, setView] = useState('landing')
+// ─── Quiz Page (manages quiz + results state) ─────────────────────────────────
+function QuizPage() {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState({})
   const [results, setResults] = useState(null)
-
-  function startQuiz() {
-    setStep(0)
-    setAnswers({})
-    setResults(null)
-    setView('quiz')
-  }
 
   function handleNext() {
     if (step < TOTAL_STEPS - 1) {
       setStep(s => s + 1)
       window.scrollTo(0, 0)
     } else {
-      const r = calculateResults(answers)
-      setResults(r)
-      setView('results')
+      setResults(calculateResults(answers))
       window.scrollTo(0, 0)
     }
   }
 
   function handleBack() {
-    if (step > 0) {
-      setStep(s => s - 1)
-      window.scrollTo(0, 0)
-    }
+    setStep(s => s - 1)
+    window.scrollTo(0, 0)
   }
 
   function handleChange(val) {
     setAnswers(prev => ({ ...prev, [questions[step].id]: val }))
   }
 
-  if (view === 'landing') return <Landing onStart={startQuiz} />
-  if (view === 'results') return <Results results={results} onRetake={startQuiz} />
+  function handleRetake() {
+    setStep(0)
+    setAnswers({})
+    setResults(null)
+    window.scrollTo(0, 0)
+  }
+
+  if (results) return <Results results={results} onRetake={handleRetake} />
 
   return (
     <QuizStep
@@ -378,5 +428,15 @@ export default function App() {
       stepIndex={step}
       total={TOTAL_STEPS}
     />
+  )
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/quiz" element={<QuizPage />} />
+    </Routes>
   )
 }
